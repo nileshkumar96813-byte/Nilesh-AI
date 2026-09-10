@@ -1,0 +1,863 @@
+import express from "express";
+import dotenv from "dotenv";
+import OpenAI from "openai";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json({ limit: "1mb" }));
+
+let client = null;
+
+if (process.env.OPENAI_API_KEY) {
+  client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+}
+
+/* =========================
+   FRONTEND
+========================= */
+
+const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Nilesh AI</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left, #dbeafe, transparent 35%),
+    radial-gradient(circle at bottom right, #e0e7ff, transparent 35%),
+    #f8fafc;
+  min-height: 100vh;
+  color: #172033;
+}
+
+.app {
+  width: 100%;
+  max-width: 1100px;
+  min-height: 100vh;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 70px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.logo {
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  background: linear-gradient(135deg,#2563eb,#7c3aed);
+  box-shadow: 0 8px 20px rgba(37,99,235,.25);
+}
+
+.brand-text h1 {
+  font-size: 20px;
+}
+
+.brand-text p {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* CHAT */
+
+.chat {
+  flex: 1;
+  padding: 25px 16px 150px;
+  overflow-x: hidden;
+}
+
+.welcome {
+  max-width: 720px;
+  margin: 35px auto;
+  text-align: center;
+}
+
+.welcome-icon {
+  width: 75px;
+  height: 75px;
+  margin: auto;
+  display: grid;
+  place-items: center;
+  border-radius: 25px;
+  background: linear-gradient(135deg,#2563eb,#7c3aed);
+  color: white;
+  font-size: 38px;
+  box-shadow: 0 15px 35px rgba(37,99,235,.22);
+}
+
+.welcome h2 {
+  margin-top: 18px;
+  font-size: 29px;
+}
+
+.welcome p {
+  margin-top: 8px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.examples {
+  margin-top: 25px;
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 12px;
+}
+
+.example {
+  border: 1px solid #e2e8f0;
+  background: rgba(255,255,255,.85);
+  border-radius: 16px;
+  padding: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.example:hover {
+  transform: translateY(-2px);
+  border-color: #93c5fd;
+  box-shadow: 0 8px 20px rgba(15,23,42,.07);
+}
+
+.example strong {
+  display: block;
+  font-size: 14px;
+}
+
+.example span {
+  display: block;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* MESSAGE */
+
+.message {
+  max-width: 850px;
+  margin: 0 auto 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.ai-avatar {
+  background: linear-gradient(135deg,#2563eb,#7c3aed);
+  color: white;
+}
+
+.user-avatar {
+  background: #e2e8f0;
+  color: #334155;
+  order: 2;
+}
+
+.bubble {
+  max-width: min(760px,82%);
+  padding: 13px 16px;
+  border-radius: 17px;
+  line-height: 1.6;
+  font-size: 15px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ai-bubble {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-top-left-radius: 5px;
+}
+
+.user-bubble {
+  background: linear-gradient(135deg,#2563eb,#4f46e5);
+  color: white;
+  border-top-right-radius: 5px;
+}
+
+/* TYPING */
+
+.typing {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #64748b;
+  animation: bounce 1s infinite;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: .15s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: .3s;
+}
+
+@keyframes bounce {
+  0%,60%,100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+}
+
+/* INPUT AREA */
+
+.input-area {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1100px,100%);
+  padding: 12px 15px 18px;
+  background: linear-gradient(
+    to top,
+    rgba(248,250,252,1) 75%,
+    rgba(248,250,252,0)
+  );
+}
+
+.input-box {
+  max-width: 850px;
+  margin: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #dbe3ef;
+  border-radius: 20px;
+  box-shadow: 0 10px 35px rgba(15,23,42,.12);
+}
+
+textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  min-height: 45px;
+  max-height: 140px;
+  padding: 12px 10px;
+  font-size: 15px;
+  font-family: inherit;
+  background: transparent;
+}
+
+.send {
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  background: linear-gradient(135deg,#2563eb,#7c3aed);
+  cursor: pointer;
+  font-size: 19px;
+  transition: .2s;
+}
+
+.send:hover {
+  transform: scale(1.04);
+}
+
+.send:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.bottom-text {
+  max-width: 850px;
+  margin: 7px auto 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+/* BUTTONS */
+
+.top-buttons {
+  display: flex;
+  gap: 7px;
+}
+
+.top-btn {
+  border: 1px solid #e2e8f0;
+  background: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  cursor: pointer;
+}
+
+/* MOBILE */
+
+@media(max-width:600px) {
+
+  .header {
+    height: 62px;
+  }
+
+  .logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .brand-text h1 {
+    font-size: 17px;
+  }
+
+  .status {
+    display: none;
+  }
+
+  .chat {
+    padding-top: 15px;
+  }
+
+  .welcome {
+    margin: 25px auto;
+  }
+
+  .welcome h2 {
+    font-size: 25px;
+  }
+
+  .examples {
+    grid-template-columns: 1fr;
+  }
+
+  .bubble {
+    font-size: 14px;
+    max-width: 82%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+  <div class="brand">
+    <div class="logo">N</div>
+
+    <div class="brand-text">
+      <h1>Nilesh AI</h1>
+      <p>Your AI Assistant</p>
+    </div>
+  </div>
+
+  <div class="status">
+    <span class="status-dot"></span>
+    <span id="statusText">Online</span>
+  </div>
+
+  <div class="top-buttons">
+    <button class="top-btn" onclick="newChat()" title="New Chat">
+      ＋
+    </button>
+  </div>
+
+</header>
+
+<main class="chat" id="chat">
+
+  <section class="welcome" id="welcome">
+
+    <div class="welcome-icon">✦</div>
+
+    <h2>Hello, I'm Nilesh AI</h2>
+
+    <p>
+      Ask me anything. I can help with coding,
+      learning, writing, ideas and everyday questions.
+    </p>
+
+    <div class="examples">
+
+      <button class="example"
+        onclick="useExample('Explain HTML in simple language')">
+        <strong>💻 Learn coding</strong>
+        <span>Explain HTML in simple language</span>
+      </button>
+
+      <button class="example"
+        onclick="useExample('Create a simple website idea for me')">
+        <strong>🌐 Website idea</strong>
+        <span>Create a simple website idea</span>
+      </button>
+
+      <button class="example"
+        onclick="useExample('Help me improve my English')">
+        <strong>📚 English</strong>
+        <span>Help me improve my English</span>
+      </button>
+
+      <button class="example"
+        onclick="useExample('Give me a useful computer tip')">
+        <strong>🤖 Computer help</strong>
+        <span>Give me a useful computer tip</span>
+      </button>
+
+    </div>
+
+  </section>
+
+</main>
+
+<div class="input-area">
+
+  <div class="input-box">
+
+    <textarea
+      id="messageInput"
+      placeholder="Message Nilesh AI..."
+      rows="1"
+      maxlength="8000"></textarea>
+
+    <button
+      class="send"
+      id="sendBtn"
+      onclick="sendMessage()">
+      ➤
+    </button>
+
+  </div>
+
+  <div class="bottom-text">
+    Nilesh AI can make mistakes. Check important information.
+  </div>
+
+</div>
+
+</div>
+
+<script>
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const welcome = document.getElementById("welcome");
+const statusText = document.getElementById("statusText");
+
+let busy = false;
+
+function useExample(text) {
+  input.value = text;
+  input.focus();
+  autoResize();
+}
+
+function autoResize() {
+  input.style.height = "auto";
+  input.style.height =
+    Math.min(input.scrollHeight, 140) + "px";
+}
+
+input.addEventListener("input", autoResize);
+
+input.addEventListener("keydown", function(e) {
+
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+
+});
+
+function addMessage(text, type) {
+
+  if (welcome) {
+    welcome.remove();
+  }
+
+  const row = document.createElement("div");
+  row.className = "message " + type;
+
+  const avatar = document.createElement("div");
+  avatar.className =
+    "avatar " +
+    (type === "user" ? "user-avatar" : "ai-avatar");
+
+  avatar.textContent =
+    type === "user" ? "NK" : "N";
+
+  const bubble = document.createElement("div");
+
+  bubble.className =
+    "bubble " +
+    (type === "user"
+      ? "user-bubble"
+      : "ai-bubble");
+
+  bubble.textContent = text;
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+
+  chat.appendChild(row);
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: "smooth"
+  });
+
+  return row;
+}
+
+function addTyping() {
+
+  if (welcome) {
+    welcome.remove();
+  }
+
+  const row = document.createElement("div");
+  row.className = "message ai";
+  row.id = "typingMessage";
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar ai-avatar";
+  avatar.textContent = "N";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble ai-bubble";
+
+  bubble.innerHTML = \`
+    <div class="typing">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  \`;
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+
+  chat.appendChild(row);
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: "smooth"
+  });
+}
+
+function removeTyping() {
+
+  const item =
+    document.getElementById("typingMessage");
+
+  if (item) {
+    item.remove();
+  }
+}
+
+async function sendMessage() {
+
+  if (busy) return;
+
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  busy = true;
+  sendBtn.disabled = true;
+  statusText.textContent = "Thinking...";
+
+  addMessage(text, "user");
+
+  input.value = "";
+  input.style.height = "45px";
+
+  addTyping();
+
+  try {
+
+    const response = await fetch("/api/chat", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        message: text
+      })
+
+    });
+
+    const data = await response.json();
+
+    removeTyping();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Server error"
+      );
+    }
+
+    addMessage(
+      data.reply || "I could not generate a reply.",
+      "ai"
+    );
+
+    statusText.textContent = "Online";
+
+  } catch (error) {
+
+    removeTyping();
+
+    addMessage(
+      "Sorry, I couldn't connect to the AI.\\n\\n" +
+      error.message +
+      "\\n\\nPlease check your server and API key.",
+      "ai"
+    );
+
+    statusText.textContent = "Connection error";
+
+  } finally {
+
+    busy = false;
+    sendBtn.disabled = false;
+
+    setTimeout(() => {
+      statusText.textContent = "Online";
+    }, 2500);
+
+    input.focus();
+  }
+}
+
+function newChat() {
+
+  location.reload();
+
+}
+
+</script>
+
+</body>
+</html>
+`;
+
+/* =========================
+   ROUTES
+========================= */
+
+app.get("/", (req, res) => {
+  res.send(html);
+});
+
+app.get("/api/health", (req, res) => {
+
+  res.json({
+    ok: true,
+    aiConfigured: Boolean(process.env.OPENAI_API_KEY)
+  });
+
+});
+
+/* =========================
+   AI CHAT API
+========================= */
+
+app.post("/api/chat", async (req, res) => {
+
+  try {
+
+    const message = String(
+      req.body?.message || ""
+    ).trim();
+
+    if (!message) {
+      return res.status(400).json({
+        error: "Message is required."
+      });
+    }
+
+    if (message.length > 8000) {
+      return res.status(400).json({
+        error: "Message is too long."
+      });
+    }
+
+    if (!client) {
+      return res.status(500).json({
+        error:
+          "OpenAI API key is not configured. " +
+          "Add OPENAI_API_KEY to your .env file."
+      });
+    }
+
+    const response =
+      await client.responses.create({
+
+        model: "gpt-5.5",
+
+        instructions: `
+You are Nilesh AI, a helpful and friendly AI assistant.
+
+Your rules:
+- Be helpful and respectful.
+- Answer clearly.
+- Prefer simple language when the user asks for simple explanations.
+- The user may communicate in Hindi, English, or Hinglish.
+- Reply in the language the user is using.
+- For coding questions, provide correct runnable code.
+- Do not claim that you performed an action when you did not.
+- If you do not know something, say so honestly.
+- Keep answers practical and easy to understand.
+        `,
+
+        input: message
+
+      });
+
+    const reply =
+      response.output_text?.trim();
+
+    if (!reply) {
+
+      return res.status(500).json({
+        error: "The AI returned an empty response."
+      });
+
+    }
+
+    res.json({
+      reply
+    });
+
+  } catch (error) {
+
+    console.error("AI ERROR:", error);
+
+    let message =
+      "Unable to contact the AI service.";
+
+    if (error?.status === 401) {
+      message =
+        "Invalid OpenAI API key. Please check your .env file.";
+    }
+
+    else if (error?.status === 429) {
+      message =
+        "The API request was limited or your account has insufficient quota.";
+    }
+
+    else if (error?.message) {
+      message = error.message;
+    }
+
+    res.status(500).json({
+      error: message
+    });
+
+  }
+
+});
+
+/* =========================
+   START SERVER
+========================= */
+
+app.listen(PORT, () => {
+
+  console.log("");
+  console.log("=================================");
+  console.log("        NILESH AI");
+  console.log("=================================");
+  console.log("Server running on:");
+  console.log("http://localhost:" + PORT);
+  console.log("");
+  console.log(
+    "OpenAI API:",
+    process.env.OPENAI_API_KEY
+      ? "CONFIGURED"
+      : "NOT CONFIGURED"
+  );
+  console.log("=================================");
+  console.log("");
+
+});
