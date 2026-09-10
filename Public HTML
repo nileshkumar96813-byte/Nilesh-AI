@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Nilesh AI</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <header class="header">
+
+      <div class="brand">
+
+        <div class="logo">
+          N
+        </div>
+
+        <div>
+          <h1>Nilesh AI</h1>
+          <p>Smart AI Assistant</p>
+        </div>
+
+      </div>
+
+      <button
+        id="newChatBtn"
+        class="new-chat">
+        + New Chat
+      </button>
+
+    </header>
+
+
+    <main class="chat-area" id="chatArea">
+
+      <section class="welcome" id="welcome">
+
+        <div class="welcome-logo">
+          N
+        </div>
+
+        <h2>
+          Hello, I'm Nilesh AI
+        </h2>
+
+        <p>
+          Ask me anything. I can help you with
+          coding, study, writing, ideas and more.
+        </p>
+
+
+        <div class="suggestions">
+
+          <button data-question="Explain HTML in simple language">
+            💻 Explain HTML
+          </button>
+
+          <button data-question="Help me create a website">
+            🌐 Create a website
+          </button>
+
+          <button data-question="Help me learn English">
+            📚 Learn English
+          </button>
+
+          <button data-question="Give me a computer tip">
+            🤖 Computer help
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <footer class="input-area">
+
+      <div class="input-box">
+
+        <textarea
+          id="messageInput"
+          placeholder="Message Nilesh AI..."
+          rows="1"></textarea>
+
+        <button
+          id="sendBtn"
+          class="send-btn">
+          ➤
+        </button>
+
+      </div>
+
+      <p class="notice">
+        Nilesh AI may make mistakes. Check important information.
+      </p>
+
+    </footer>
+
+  </div>
+
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
