@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Nilesh Kumar AI</title>
+
+  <meta
+    name="description"
+    content="Nilesh Kumar AI - AI Assistant, Translation, Resume, Jobs and English Speaking"
+  >
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="header">
+
+  <div class="brand">
+    <div class="logo">NK</div>
+
+    <div>
+      <b>Nilesh Kumar AI</b>
+      <small>AI Assistant & Resume Builder</small>
+    </div>
+  </div>
+
+  <button class="menuBtn"
+          onclick="toggleMenu()">☰</button>
+
+  <nav id="nav">
+
+    <button onclick="showPage('home')">
+      Home
+    </button>
+
+    <button onclick="showPage('chat')">
+      AI Chat
+    </button>
+
+    <button onclick="showPage('translation')">
+      Translation
+    </button>
+
+    <button onclick="showPage('resume')">
+      Resume
+    </button>
+
+    <button onclick="showPage('jobs')">
+      Jobs
+    </button>
+
+    <button onclick="showPage('english')">
+      English
+    </button>
+
+  </nav>
+
+</header>
+
+
+<main>
+
+<!-- HOME -->
+
+<section id="home" class="page active">
+
+  <div class="hero">
+
+    <div>
+
+      <span class="badge">
+        ✨ All-in-One AI Assistant
+      </span>
+
+      <h1>
+        Nilesh Kumar AI
+      </h1>
+
+      <p>
+        AI Chat, Expert Translation,
+        Resume Builder, Jobs and
+        English Speaking Practice.
+      </p>
+
+      <button
+        class="primary"
+        onclick="showPage('chat')">
+        Start AI Chat
+      </button>
+
+      <button
+        class="secondary"
+        onclick="showPage('resume')">
+        Build Resume
+      </button>
+
+    </div>
+
+    <div class="heroCard">
+
+      <div class="robot">
+        🤖
+      </div>
+
+      <h2>
+        Smart AI Assistant
+      </h2>
+
+      <p>
+        Hindi • English • Hinglish
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div class="cards">
+
+    <div class="card"
+         onclick="showPage('chat')">
+      <div>🤖</div>
+      <h3>AI Chat</h3>
+      <p>
+        Ask questions and get AI answers.
+      </p>
+    </div>
+
+    <div class="card"
+         onclick="showPage('translation')">
+      <div>🌐</div>
+      <h3>Expert Translation</h3>
+      <p>
+        Hindi, English and Hinglish.
+      </p>
+    </div>
+
+    <div class="card"
+         onclick="showPage('resume')">
+      <div>📄</div>
+      <h3>Resume Builder</h3>
+      <p>
+        Create a professional resume.
+      </p>
+    </div>
+
+    <div class="card"
+         onclick="showPage('jobs')">
+      <div>💼</div>
+      <h3>Job Assistant</h3>
+      <p>
+        Career and interview assistance.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- AI CHAT -->
+
+<section id="chat" class="page">
+
+  <h2>🤖 Nilesh AI Chat</h2>
+
+  <div id="chatBox"
+       class="chatBox">
+
+    <div class="message ai">
+      Hello! I am Nilesh Kumar AI.
+      Ask me anything.
+    </div>
+
+  </div>
+
+  <div class="quickButtons">
+
+    <button onclick="quickChat('translation')">
+      🌐 Translation
+    </button>
+
+    <button onclick="quickChat('resume')">
+      📄 Resume
+    </button>
+
+    <button onclick="quickChat('jobs')">
+      💼 Job
+    </button>
+
+    <button onclick="quickChat('english')">
+      🎤 English
+    </button>
+
+    <button onclick="quickChat('coding')">
+      💻 Coding
+    </button>
+
+  </div>
+
+  <div class="composer">
+
+    <textarea
+      id="chatInput"
+      placeholder="Type your question..."
+    ></textarea>
+
+    <button
+      onclick="startVoice('chatInput')">
+      🎙️
+    </button>
+
+    <button
+      class="primary"
+      onclick="sendMessage()">
+      Send
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- TRANSLATION -->
+
+<section id="translation" class="page">
+
+  <h2>🌐 Expert Translation</h2>
+
+  <div class="languageRow">
+
+    <select id="fromLanguage">
+      <option>Auto Detect</option>
+      <option>Hindi</option>
+      <option>English</option>
+      <option>Hinglish</option>
+    </select>
+
+    <span>→</span>
+
+    <select id="toLanguage">
+      <option>English</option>
+      <option>Hindi</option>
+      <option>Hinglish</option>
+    </select>
+
+  </div>
+
+  <textarea
+    id="translationInput"
+    class="bigInput"
+    placeholder="Enter text to translate..."
+  ></textarea>
+
+  <div class="buttonRow">
+
+    <button
+      class="secondary"
+      onclick="startVoice('translationInput')">
+      🎙️ Speak
+    </button>
+
+    <button
+      class="primary"
+      onclick="translateText()">
+      Translate
+    </button>
+
+  </div>
+
+  <div
+    id="translationOutput"
+    class="output">
+    Translation will appear here.
+  </div>
+
+  <button
+    class="secondary"
+    onclick="speakOutput()">
+    🔊 Speak Translation
+  </button>
+
+</section>
+
+
+<!-- RESUME -->
+
+<section id="resume" class="page">
+
+  <h2>📄 Expert Resume Builder</h2>
+
+  <div class="resumeLayout">
+
+    <div class="form">
+
+      <input
+        id="name"
+        placeholder="Full Name">
+
+      <input
+        id="title"
+        placeholder="Professional Title">
+
+      <input
+        id="mobile"
+        placeholder="Mobile">
+
+      <input
+        id="email"
+        placeholder="Email">
+
+      <textarea
+        id="address"
+        placeholder="Address"></textarea>
+
+      <textarea
+        id="objective"
+        placeholder="Professional Summary / Objective"></textarea>
+
+      <textarea
+        id="education"
+        placeholder="Education"></textarea>
+
+      <textarea
+        id="skills"
+        placeholder="Skills"></textarea>
+
+      <textarea
+        id="experience"
+        placeholder="Experience"></textarea>
+
+      <textarea
+        id="projects"
+        placeholder="Projects"></textarea>
+
+      <textarea
+        id="certificates"
+        placeholder="Certificates"></textarea>
+
+      <textarea
+        id="languages"
+        placeholder="Languages"></textarea>
+
+      <textarea
+        id="achievements"
+        placeholder="Achievements"></textarea>
+
+      <button
+        class="primary"
+        onclick="updateResume()">
+        Update Resume
+      </button>
+
+      <button
+        class="secondary"
+        onclick="window.print()">
+        🖨️ Print / Save PDF
+      </button>
+
+    </div>
+
+
+    <div
+      id="resumePreview"
+      class="resumePreview">
+
+      <h1>Your Name</h1>
+
+      <h3>
+        Professional Title
+      </h3>
+
+      <p>
+        Mobile | Email
+      </p>
+
+      <hr>
+
+      <h3>Professional Summary</h3>
+      <p>Your summary will appear here.</p>
+
+      <h3>Education</h3>
+      <p></p>
+
+      <h3>Skills</h3>
+      <p></p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- JOBS -->
+
+<section id="jobs" class="page">
+
+  <h2>💼 Job & Career Assistant</h2>
+
+  <div class="cards">
+
+    <div class="card"
+         onclick="jobHelp('interview')">
+
+      <div>🎯</div>
+
+      <h3>
+        Interview Preparation
+      </h3>
+
+      <p>
+        Prepare common interview questions.
+      </p>
+
+    </div>
+
+    <div class="card"
+         onclick="jobHelp('introduction')">
+
+      <div>👨‍💼</div>
+
+      <h3>
+        Self Introduction
+      </h3>
+
+      <p>
+        Create your professional introduction.
+      </p>
+
+    </div>
+
+    <div class="card"
+         onclick="jobHelp('application')">
+
+      <div>✉️</div>
+
+      <h3>
+        Job Application
+      </h3>
+
+      <p>
+        Write professional job messages.
+      </p>
+
+    </div>
+
+    <div class="card"
+         onclick="jobHelp('career')">
+
+      <div>🚀</div>
+
+      <h3>
+        Career Guidance
+      </h3>
+
+      <p>
+        Get practical career guidance.
+      </p>
+
+    </div>
+
+  </div>
+
+  <div
+    id="jobOutput"
+    class="output">
+    Select an option above.
+  </div>
+
+</section>
+
+
+<!-- ENGLISH -->
+
+<section id="english" class="page">
+
+  <h2>🎤 English Speaking Practice</h2>
+
+  <div class="practice">
+
+    <h3>
+      Tell me about yourself.
+    </h3>
+
+    <textarea
+      id="englishInput"
+      class="bigInput"
+      placeholder="Speak or type your answer..."
+    ></textarea>
+
+    <button
+      class="secondary"
+      onclick="startVoice('englishInput')">
+      🎙️ Speak
+    </button>
+
+    <button
+      class="primary"
+      onclick="checkEnglish()">
+      Check English
+    </button>
+
+    <div
+      id="englishOutput"
+      class="output">
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+  Nilesh Kumar AI • AI Assistant • Translation • Resume • Jobs • English
+</footer>
+
+<script src="app.js"></script>
+
+</body>
+                           </html>
+                           
